@@ -7,11 +7,9 @@ const api = axios.create({
 
 export async function register({ username, email, password }) {
   try {
-    const response = await api.post("/api/v1/auth/register", {
-      username,
-      email,
-      password,
-    });
+    const payload = { username, email, password };
+    console.log("Register payload:", payload);
+    const response = await api.post("/api/v1/auth/register", payload);
 
     return response.data;
   } catch (err) {
