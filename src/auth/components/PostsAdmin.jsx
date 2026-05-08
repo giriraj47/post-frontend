@@ -1,8 +1,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-function PostsAdmin({}) {
+function PostsAdmin({ refreshKey }) {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [editingPostId, setEditingPostId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
@@ -18,12 +19,14 @@ function PostsAdmin({}) {
       setPosts(response.data.posts);
     } catch (error) {
       console.error("Error fetching posts:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [refreshKey]);
 
   const startEdit = (post) => {
     setEditingPostId(post._id);
@@ -43,9 +46,8 @@ function PostsAdmin({}) {
         title: editTitle,
         description: editDescription,
       });
-
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
+      setPosts((prev) =>
+        prev.map((post) =>
           post._id === postId ? { ...post, ...response.data.post } : post,
         ),
       );
@@ -57,204 +59,308 @@ function PostsAdmin({}) {
   };
 
   const deletePost = async (postId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this post?",
-    );
+    const confirmed = window.confirm("Delete this post?");
     if (!confirmed) return;
-
     try {
       await api.delete(`/api/v1/post/delete/${postId}`);
-      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+      setPosts((prev) => prev.filter((post) => post._id !== postId));
     } catch (error) {
       console.error("Error deleting post:", error);
       alert("Failed to delete post. Please try again.");
     }
   };
 
-  return (
-    <div style={styles.container}>
-      <h1 style={styles.heading}>Posts</h1>
+  const font = "'Plus Jakarta Sans', sans-serif";
 
-      <div style={styles.postsContainer}>
-        {posts.map((post) => (
-          <div key={post._id} style={styles.card}>
-            <div style={styles.cardHeader}>
-              <div style={styles.titleWrapper}>
-                {editingPostId === post._id ? (
+  return (
+    <div style={{ ...styles.container, fontFamily: font }}>
+      <div style={styles.pageHeader}>
+        <h1 style={{ ...styles.heading, fontFamily: font }}>Posts</h1>
+        <span style={{ ...styles.count, fontFamily: font }}>
+          {!loading &&
+            `${posts.length} ${posts.length === 1 ? "post" : "posts"}`}
+        </span>
+      </div>
+
+      {loading ? (
+        <div style={styles.emptyState}>
+          <p style={{ ...styles.emptyText, fontFamily: font }}>
+            Loading posts…
+          </p>
+        </div>
+      ) : posts.length === 0 ? (
+        <div style={styles.emptyState}>
+          <p style={{ ...styles.emptyText, fontFamily: font }}>
+            No posts yet. Create one!
+          </p>
+        </div>
+      ) : (
+        <div style={styles.grid}>
+          {posts.map((post) => (
+            <div key={post._id} style={styles.card}>
+              {editingPostId === post._id ? (
+                /* ── Edit mode ── */
+                <>
                   <input
-                    style={styles.titleInput}
+                    style={{ ...styles.editTitleInput, fontFamily: font }}
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
+                    onFocus={(e) =>
+                      Object.assign(e.target.style, styles.inputFocus)
+                    }
+                    onBlur={(e) =>
+                      Object.assign(e.target.style, {
+                        borderColor: "#E2E1DC",
+                        boxShadow: "none",
+                      })
+                    }
                   />
-                ) : (
-                  <h2 style={styles.title}>{post.title}</h2>
-                )}
-              </div>
-
-              <div style={styles.actionButtons}>
-                {editingPostId === post._id ? (
-                  <>
+                  <textarea
+                    style={{ ...styles.editTextarea, fontFamily: font }}
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    onFocus={(e) =>
+                      Object.assign(e.target.style, styles.inputFocus)
+                    }
+                    onBlur={(e) =>
+                      Object.assign(e.target.style, {
+                        borderColor: "#E2E1DC",
+                        boxShadow: "none",
+                      })
+                    }
+                  />
+                  <div style={styles.editActions}>
                     <button
                       type="button"
-                      style={styles.saveButton}
-                      onClick={() => saveEdit(post._id)}
-                    >
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      style={styles.cancelButton}
+                      style={{ ...styles.cancelBtn, fontFamily: font }}
                       onClick={cancelEdit}
                     >
                       Cancel
                     </button>
-                  </>
-                ) : (
-                  <>
                     <button
                       type="button"
-                      style={styles.editButton}
-                      onClick={() => startEdit(post)}
+                      style={{ ...styles.saveBtn, fontFamily: font }}
+                      onClick={() => saveEdit(post._id)}
+                      onMouseEnter={(e) =>
+                        (e.target.style.backgroundColor = "#B05525")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.target.style.backgroundColor = "#C9602E")
+                      }
                     >
-                      Edit
+                      Save changes
                     </button>
-                    <button
-                      type="button"
-                      style={styles.deleteButton}
-                      onClick={() => deletePost(post._id)}
-                    >
-                      Delete
-                    </button>
-                  </>
-                )}
-              </div>
+                  </div>
+                </>
+              ) : (
+                /* ── View mode ── */
+                <>
+                  <div style={styles.cardHeader}>
+                    <h2 style={{ ...styles.title, fontFamily: font }}>
+                      {post.title}
+                    </h2>
+                    <div style={styles.cardActions}>
+                      <button
+                        type="button"
+                        style={{ ...styles.editBtn, fontFamily: font }}
+                        onClick={() => startEdit(post)}
+                        onMouseEnter={(e) => (
+                          (e.target.style.borderColor = "#C9602E"),
+                          (e.target.style.color = "#C9602E")
+                        )}
+                        onMouseLeave={(e) => (
+                          (e.target.style.borderColor = "#E2E1DC"),
+                          (e.target.style.color = "#6B6A65")
+                        )}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        style={{ ...styles.deleteBtn, fontFamily: font }}
+                        onClick={() => deletePost(post._id)}
+                        onMouseEnter={(e) => (
+                          (e.target.style.backgroundColor = "#B91C1C"),
+                          (e.target.style.borderColor = "#B91C1C")
+                        )}
+                        onMouseLeave={(e) => (
+                          (e.target.style.backgroundColor = "white"),
+                          (e.target.style.borderColor = "#FECACA"),
+                          (e.target.style.color = "#DC2626")
+                        )}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                  <div style={styles.divider} />
+                  <p style={{ ...styles.description, fontFamily: font }}>
+                    {post.description}
+                  </p>
+                </>
+              )}
             </div>
-
-            {editingPostId === post._id ? (
-              <textarea
-                style={styles.descriptionInput}
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-              />
-            ) : (
-              <p style={styles.description}>{post.description}</p>
-            )}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 const styles = {
   container: {
-    padding: "40px",
-    backgroundColor: "#f4f4f4",
-    minHeight: "100vh",
+    padding: "40px 48px",
+    backgroundColor: "#F5F4F0",
+    minHeight: "calc(100vh - 64px)",
+    maxWidth: "800px",
+    margin: "0 auto",
   },
-
+  pageHeader: {
+    display: "flex",
+    alignItems: "baseline",
+    gap: "12px",
+    marginBottom: "32px",
+  },
   heading: {
-    marginBottom: "30px",
-    fontSize: "32px",
+    fontSize: "26px",
+    fontWeight: "700",
+    color: "#1C1B18",
+    margin: 0,
   },
-
-  postsContainer: {
+  count: {
+    fontSize: "13px",
+    color: "#6B6A65",
+    fontWeight: "500",
+  },
+  grid: {
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
+    gap: "16px",
   },
-
   card: {
-    position: "relative",
-    backgroundColor: "white",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 0 10px rgba(0,0,0,0.08)",
+    backgroundColor: "#FFFFFF",
+    padding: "22px 26px",
+    borderRadius: "12px",
+    border: "1px solid #E2E1DC",
   },
-
   cardHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    gap: "12px",
+    gap: "16px",
   },
-
-  titleWrapper: {
-    flex: 1,
-    minWidth: 0,
-  },
-
   title: {
-    marginBottom: "10px",
-    fontSize: "24px",
-    wordBreak: "break-word",
+    margin: "0 0 14px 0",
+    fontSize: "17px",
+    fontWeight: "700",
+    color: "#1C1B18",
+    lineHeight: "1.3",
+    flex: 1,
   },
-
-  titleInput: {
-    width: "100%",
-    padding: "10px",
-    fontSize: "22px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
+  divider: {
+    height: "1px",
+    backgroundColor: "#F0EFE9",
+    marginBottom: "14px",
   },
-
-  actionButtons: {
+  description: {
+    color: "#4A4944",
+    lineHeight: "1.7",
+    fontSize: "14px",
+    margin: 0,
+  },
+  cardActions: {
     display: "flex",
     gap: "8px",
-    flexWrap: "wrap",
-    justifyContent: "flex-end",
+    flexShrink: 0,
   },
-
-  editButton: {
-    padding: "8px 12px",
-    border: "1px solid #007bff",
+  editBtn: {
+    padding: "6px 14px",
+    border: "1px solid #E2E1DC",
     borderRadius: "6px",
     backgroundColor: "white",
-    color: "#007bff",
+    color: "#6B6A65",
     cursor: "pointer",
+    fontSize: "12px",
+    fontWeight: "500",
+    transition: "all 0.15s",
   },
-
-  deleteButton: {
-    padding: "8px 12px",
-    border: "1px solid #dc3545",
-    borderRadius: "6px",
-    backgroundColor: "#dc3545",
-    color: "white",
-    cursor: "pointer",
-  },
-
-  saveButton: {
-    padding: "8px 12px",
-    border: "1px solid #28a745",
-    borderRadius: "6px",
-    backgroundColor: "#28a745",
-    color: "white",
-    cursor: "pointer",
-  },
-
-  cancelButton: {
-    padding: "8px 12px",
-    border: "1px solid #6c757d",
+  deleteBtn: {
+    padding: "6px 14px",
+    border: "1px solid #FECACA",
     borderRadius: "6px",
     backgroundColor: "white",
-    color: "#6c757d",
+    color: "#DC2626",
     cursor: "pointer",
+    fontSize: "12px",
+    fontWeight: "500",
+    transition: "all 0.15s",
   },
-
-  description: {
-    color: "#555",
-    lineHeight: "1.6",
-    marginTop: "16px",
-  },
-
-  descriptionInput: {
+  editTitleInput: {
     width: "100%",
-    minHeight: "120px",
-    padding: "12px",
+    padding: "10px 12px",
     fontSize: "16px",
+    fontWeight: "600",
     borderRadius: "8px",
-    border: "1px solid #ccc",
-    marginTop: "16px",
+    border: "1px solid #E2E1DC",
+    backgroundColor: "#FAFAF8",
+    color: "#1C1B18",
+    outline: "none",
+    marginBottom: "12px",
+    boxSizing: "border-box",
+  },
+  editTextarea: {
+    width: "100%",
+    minHeight: "110px",
+    padding: "10px 12px",
+    fontSize: "14px",
+    borderRadius: "8px",
+    border: "1px solid #E2E1DC",
+    backgroundColor: "#FAFAF8",
+    color: "#1C1B18",
+    outline: "none",
+    resize: "vertical",
+    marginBottom: "14px",
+    boxSizing: "border-box",
+  },
+  inputFocus: {
+    borderColor: "#C9602E",
+    boxShadow: "0 0 0 3px rgba(201,96,46,0.12)",
+  },
+  editActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "8px",
+  },
+  cancelBtn: {
+    padding: "8px 14px",
+    border: "1px solid #E2E1DC",
+    borderRadius: "7px",
+    backgroundColor: "white",
+    color: "#6B6A65",
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: "500",
+  },
+  saveBtn: {
+    padding: "8px 16px",
+    border: "none",
+    borderRadius: "7px",
+    backgroundColor: "#C9602E",
+    color: "white",
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: "600",
+    transition: "background-color 0.15s",
+  },
+  emptyState: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "200px",
+  },
+  emptyText: {
+    color: "#6B6A65",
+    fontSize: "14px",
   },
 };
 

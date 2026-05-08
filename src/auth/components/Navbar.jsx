@@ -12,59 +12,77 @@ function Navbar() {
 
   return (
     <nav style={styles.navbar}>
-      <h1 style={styles.logo}>Posty</h1>
-
-      <div style={styles.rightSection}>
-        <button type="button" style={styles.logoutButton} onClick={onLogout}>
-          Logout
-        </button>
+      <div style={styles.logo}>
+        <span style={styles.logoMark}>P</span>
+        <span style={styles.logoText}>Posty</span>
       </div>
+
+      <button
+        type="button"
+        style={styles.logoutButton}
+        onClick={onLogout}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = "rgba(255,255,255,0.1)";
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = "transparent";
+        }}
+      >
+        Sign out
+      </button>
     </nav>
   );
 }
 
+const font = "'Plus Jakarta Sans', sans-serif";
+
 const styles = {
   navbar: {
-    height: "70px",
+    height: "64px",
     padding: "0 40px",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#111",
-    color: "white",
+    backgroundColor: "#1C1B18",
+    borderBottom: "1px solid rgba(255,255,255,0.06)",
+    fontFamily: font,
   },
-
   logo: {
-    fontSize: "28px",
-    fontWeight: "bold",
-    margin: 0,
-    letterSpacing: "1px",
-  },
-
-  rightSection: {
     display: "flex",
-    gap: "15px",
+    alignItems: "center",
+    gap: "10px",
   },
-
-  adminButton: {
-    padding: "10px 18px",
-    border: "1px solid white",
-    borderRadius: "6px",
-    backgroundColor: "transparent",
+  logoMark: {
+    width: "30px",
+    height: "30px",
+    backgroundColor: "#C9602E",
     color: "white",
-    cursor: "pointer",
+    borderRadius: "7px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     fontSize: "14px",
+    fontWeight: "700",
+    fontFamily: font,
   },
-
+  logoText: {
+    fontSize: "17px",
+    fontWeight: "700",
+    color: "white",
+    letterSpacing: "0.3px",
+    fontFamily: font,
+  },
   logoutButton: {
-    padding: "10px 18px",
-    border: "none",
-    borderRadius: "6px",
-    backgroundColor: "white",
-    color: "#111",
+    padding: "8px 16px",
+    border: "1px solid rgba(255,255,255,0.15)",
+    borderRadius: "7px",
+    backgroundColor: "transparent",
+    color: "rgba(255,255,255,0.75)",
     cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "bold",
+    fontSize: "13px",
+    fontWeight: "500",
+    fontFamily: font,
+    transition: "background-color 0.15s",
   },
 };
 

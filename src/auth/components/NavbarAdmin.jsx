@@ -34,14 +34,12 @@ function NavbarAdmin({ onPostCreated }) {
       alert("Please enter both title and description.");
       return;
     }
-
     try {
       setIsCreating(true);
       await api.post("/api/v1/post/create", {
         title: title.trim(),
         description: description.trim(),
       });
-      alert("Post created successfully.");
       closeCreateModal();
       onPostCreated?.();
     } catch (error) {
@@ -55,74 +53,129 @@ function NavbarAdmin({ onPostCreated }) {
     }
   };
 
+  const font = "'Plus Jakarta Sans', sans-serif";
+
   return (
     <>
-      <nav style={styles.navbar}>
-        <h1 style={styles.logo}>Posty</h1>
+      <nav style={{ ...styles.navbar, fontFamily: font }}>
+        <div style={styles.logo}>
+          <span style={{ ...styles.logoMark, fontFamily: font }}>P</span>
+          <span style={{ ...styles.logoText, fontFamily: font }}>Posty</span>
+          <span style={{ ...styles.adminBadge, fontFamily: font }}>Admin</span>
+        </div>
 
-        <div style={styles.rightSection}>
+        <div style={styles.actions}>
           <button
             type="button"
-            style={styles.createButton}
+            style={{ ...styles.createButton, fontFamily: font }}
             onClick={openCreateModal}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#B05525")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "#C9602E")}
           >
-            Create Post
+            + New post
           </button>
-          <button type="button" style={styles.logoutButton} onClick={onLogout}>
-            Logout
+          <button
+            type="button"
+            style={{ ...styles.logoutButton, fontFamily: font }}
+            onClick={onLogout}
+            onMouseEnter={(e) =>
+              (e.target.style.backgroundColor = "rgba(255,255,255,0.1)")
+            }
+            onMouseLeave={(e) =>
+              (e.target.style.backgroundColor = "transparent")
+            }
+          >
+            Sign out
           </button>
         </div>
       </nav>
 
       {showCreate && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
+        <div
+          style={styles.overlay}
+          onClick={(e) => e.target === e.currentTarget && closeCreateModal()}
+        >
+          <div style={{ ...styles.modal, fontFamily: font }}>
             <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>Create New Post</h2>
+              <h2 style={{ ...styles.modalTitle, fontFamily: font }}>
+                New post
+              </h2>
               <button
                 type="button"
-                style={styles.modalClose}
+                style={styles.closeBtn}
                 onClick={closeCreateModal}
               >
-                ×
+                ✕
               </button>
             </div>
 
             <form onSubmit={createPost} style={styles.form}>
-              <label style={styles.formLabel}>
-                Title
+              <div style={styles.fieldGroup}>
+                <label style={{ ...styles.label, fontFamily: font }}>
+                  Title
+                </label>
                 <input
-                  style={styles.formInput}
+                  style={{ ...styles.input, fontFamily: font }}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Enter post title"
+                  onFocus={(e) =>
+                    Object.assign(e.target.style, styles.inputFocus)
+                  }
+                  onBlur={(e) =>
+                    Object.assign(e.target.style, {
+                      borderColor: "#E2E1DC",
+                      boxShadow: "none",
+                    })
+                  }
                 />
-              </label>
+              </div>
 
-              <label style={styles.formLabel}>
-                Description
+              <div style={styles.fieldGroup}>
+                <label style={{ ...styles.label, fontFamily: font }}>
+                  Description
+                </label>
                 <textarea
-                  style={styles.formTextarea}
+                  style={{ ...styles.textarea, fontFamily: font }}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter post description"
+                  placeholder="Write something..."
+                  onFocus={(e) =>
+                    Object.assign(e.target.style, styles.inputFocus)
+                  }
+                  onBlur={(e) =>
+                    Object.assign(e.target.style, {
+                      borderColor: "#E2E1DC",
+                      boxShadow: "none",
+                    })
+                  }
                 />
-              </label>
+              </div>
 
               <div style={styles.modalActions}>
                 <button
                   type="button"
-                  style={styles.cancelButton}
+                  style={{ ...styles.cancelButton, fontFamily: font }}
                   onClick={closeCreateModal}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  style={styles.submitButton}
+                  style={{
+                    ...styles.submitButton,
+                    fontFamily: font,
+                    opacity: isCreating ? 0.7 : 1,
+                  }}
                   disabled={isCreating}
+                  onMouseEnter={(e) =>
+                    !isCreating && (e.target.style.backgroundColor = "#B05525")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.target.style.backgroundColor = "#C9602E")
+                  }
                 >
-                  {isCreating ? "Creating..." : "Create Post"}
+                  {isCreating ? "Publishing…" : "Publish post"}
                 </button>
               </div>
             </form>
@@ -135,159 +188,180 @@ function NavbarAdmin({ onPostCreated }) {
 
 const styles = {
   navbar: {
-    height: "70px",
+    height: "64px",
     padding: "0 40px",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#111",
-    color: "white",
+    backgroundColor: "#1C1B18",
+    borderBottom: "1px solid rgba(255,255,255,0.06)",
+    borderRadius: "18px",
   },
-
   logo: {
-    fontSize: "28px",
-    fontWeight: "bold",
-    margin: 0,
-    letterSpacing: "1px",
-  },
-
-  rightSection: {
     display: "flex",
-    gap: "15px",
+    alignItems: "center",
+    gap: "10px",
   },
-
+  logoMark: {
+    width: "30px",
+    height: "30px",
+    backgroundColor: "#C9602E",
+    color: "white",
+    borderRadius: "7px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "14px",
+    fontWeight: "700",
+  },
+  logoText: {
+    fontSize: "17px",
+    fontWeight: "700",
+    color: "white",
+    letterSpacing: "0.3px",
+  },
+  adminBadge: {
+    fontSize: "10px",
+    fontWeight: "600",
+    color: "#C9602E",
+    backgroundColor: "rgba(201,96,46,0.15)",
+    border: "1px solid rgba(201,96,46,0.3)",
+    padding: "2px 8px",
+    borderRadius: "20px",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+  },
+  actions: {
+    display: "flex",
+    gap: "10px",
+  },
   createButton: {
-    padding: "10px 18px",
-    border: "1px solid #28a745",
-    borderRadius: "6px",
-    backgroundColor: "#28a745",
-    color: "white",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "bold",
-  },
-
-  adminButton: {
-    padding: "10px 18px",
-    border: "1px solid white",
-    borderRadius: "6px",
-    backgroundColor: "transparent",
-    color: "white",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-
-  logoutButton: {
-    padding: "10px 18px",
+    padding: "8px 16px",
     border: "none",
-    borderRadius: "6px",
-    backgroundColor: "white",
-    color: "#111",
+    borderRadius: "7px",
+    backgroundColor: "#C9602E",
+    color: "white",
     cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "bold",
+    fontSize: "13px",
+    fontWeight: "600",
+    transition: "background-color 0.15s",
   },
-
-  modalOverlay: {
+  logoutButton: {
+    padding: "8px 16px",
+    border: "1px solid rgba(255,255,255,0.15)",
+    borderRadius: "7px",
+    backgroundColor: "transparent",
+    color: "rgba(255,255,255,0.75)",
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: "500",
+    transition: "background-color 0.15s",
+  },
+  overlay: {
     position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    inset: 0,
+    backgroundColor: "rgba(28,27,24,0.5)",
+    backdropFilter: "blur(4px)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1000,
+    padding: "24px",
   },
-
   modal: {
     width: "100%",
-    maxWidth: "500px",
-    backgroundColor: "white",
-    borderRadius: "12px",
-    padding: "24px",
-    boxShadow: "0 20px 50px rgba(0,0,0,0.15)",
+    maxWidth: "480px",
+    backgroundColor: "#FFFFFF",
+    border: "1px solid #E2E1DC",
+    borderRadius: "16px",
+    padding: "28px",
   },
-
   modalHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "20px",
+    marginBottom: "24px",
   },
-
   modalTitle: {
     margin: 0,
-    fontSize: "22px",
+    fontSize: "18px",
+    fontWeight: "700",
+    color: "#1C1B18",
   },
-
-  modalClose: {
-    background: "transparent",
+  closeBtn: {
+    background: "none",
     border: "none",
-    fontSize: "26px",
-    lineHeight: 1,
+    fontSize: "14px",
+    color: "#6B6A65",
     cursor: "pointer",
+    padding: "4px 8px",
+    borderRadius: "6px",
   },
-
   form: {
     display: "flex",
     flexDirection: "column",
     gap: "16px",
   },
-
-  formLabel: {
+  fieldGroup: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "6px",
+  },
+  label: {
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#1C1B18",
+  },
+  input: {
+    padding: "11px 14px",
+    borderRadius: "8px",
+    border: "1px solid #E2E1DC",
     fontSize: "14px",
-    color: "#333",
+    color: "#1C1B18",
+    backgroundColor: "#FAFAF8",
+    outline: "none",
   },
-
-  formInput: {
-    width: "100%",
-    padding: "12px",
+  textarea: {
+    padding: "11px 14px",
     borderRadius: "8px",
-    border: "1px solid #ccc",
-    fontSize: "16px",
-  },
-
-  formTextarea: {
-    width: "100%",
+    border: "1px solid #E2E1DC",
+    fontSize: "14px",
+    color: "#1C1B18",
+    backgroundColor: "#FAFAF8",
+    outline: "none",
     minHeight: "120px",
-    padding: "12px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-    fontSize: "16px",
     resize: "vertical",
   },
-
+  inputFocus: {
+    borderColor: "#C9602E",
+    boxShadow: "0 0 0 3px rgba(201,96,46,0.12)",
+  },
   modalActions: {
     display: "flex",
     justifyContent: "flex-end",
-    gap: "12px",
-    marginTop: "8px",
+    gap: "10px",
+    marginTop: "4px",
   },
-
   cancelButton: {
-    padding: "10px 18px",
-    border: "1px solid #6c757d",
-    borderRadius: "6px",
+    padding: "9px 16px",
+    border: "1px solid #E2E1DC",
+    borderRadius: "7px",
     backgroundColor: "white",
-    color: "#6c757d",
+    color: "#6B6A65",
     cursor: "pointer",
-    fontSize: "14px",
+    fontSize: "13px",
+    fontWeight: "500",
   },
-
   submitButton: {
-    padding: "10px 18px",
+    padding: "9px 18px",
     border: "none",
-    borderRadius: "6px",
-    backgroundColor: "#28a745",
+    borderRadius: "7px",
+    backgroundColor: "#C9602E",
     color: "white",
     cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "bold",
+    fontSize: "13px",
+    fontWeight: "600",
+    transition: "background-color 0.15s",
   },
 };
 
