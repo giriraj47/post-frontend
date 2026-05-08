@@ -11,9 +11,11 @@ export const useAuth = () => {
     try {
       const data = await login({ email, password });
       setUser(data.user);
+      return true;
     } catch (err) {
       console.error("Login failed:", err);
       alert(err.response?.data?.message || "Login failed. Please try again.");
+      return false;
     } finally {
       setLoading(false);
     }
@@ -24,9 +26,11 @@ export const useAuth = () => {
     try {
       const data = await register({ username, email, password });
       setUser(data.user);
+      return true;
     } catch (err) {
       console.error("Signup failed:", err);
       alert(err.response?.data?.message || "Sign up failed. Please try again.");
+      return false;
     } finally {
       setLoading(false);
     }
