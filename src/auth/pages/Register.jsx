@@ -20,8 +20,10 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await handleRegister({ username, email, password });
-    navigate("/");
+    const success = await handleRegister({ username, email, password });
+    if (success) {
+      navigate("/");
+    }
   };
 
   if (loading) {
@@ -41,8 +43,10 @@ function Register() {
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.fieldGroup}>
-            <label style={styles.label}>Username</label>
+            <label htmlFor="username" style={styles.label}>Username</label>
             <input
+              id="username"
+              name="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               type="text"
@@ -59,8 +63,10 @@ function Register() {
           </div>
 
           <div style={styles.fieldGroup}>
-            <label style={styles.label}>Email</label>
+            <label htmlFor="email" style={styles.label}>Email</label>
             <input
+              id="email"
+              name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               type="email"
@@ -77,8 +83,10 @@ function Register() {
           </div>
 
           <div style={styles.fieldGroup}>
-            <label style={styles.label}>Password</label>
+            <label htmlFor="password" style={styles.label}>Password</label>
             <input
+              id="password"
+              name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
