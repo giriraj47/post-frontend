@@ -6,7 +6,7 @@ function Posts() {
   const [loading, setLoading] = useState(true);
 
   const api = axios.create({
-    baseURL: "http://localhost:3000",
+    baseURL: "https://post-backend-293e.onrender.com",
     withCredentials: true,
   });
 
