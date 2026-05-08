@@ -94,6 +94,12 @@ function Login() {
             Create one
           </Link>
         </p>
+        <h4>Admin Credentials</h4>
+        <p>Email: test_01@email.com</p>
+        <p>Password: testpassword</p>
+        <h4>User Credentials</h4>
+        <p>Email: test_02@email.com</p>
+        <p>Password: testpassword</p>
       </div>
     </div>
   );
